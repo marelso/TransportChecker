@@ -8,6 +8,8 @@ namespace TransportChecker
     {
         private readonly MaterialSkin.MaterialSkinManager manager;
 
+        private string source = $"{AppDomain.CurrentDomain.BaseDirectory}\\DNIT-Distancias.csv";
+
         public Main()
         {
             InitializeComponent();
@@ -100,6 +102,14 @@ namespace TransportChecker
             else
             {
                 btn_add_item.Enabled = false;
+            }
+        }
+
+        private void validateDatabaseFile()
+        {
+            if (!File.Exists(this.source))
+            {
+                throw new Exception("Error:\n datafile not found. Please check if you have any .csv file in your folder.");
             }
         }
     }
