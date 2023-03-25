@@ -28,18 +28,39 @@
         /// </summary>
         private void InitializeComponent()
         {
+            switchTheme = new MaterialSkin.Controls.MaterialSwitch();
             SuspendLayout();
+            // 
+            // switchTheme
+            // 
+            switchTheme.AutoSize = true;
+            switchTheme.Depth = 0;
+            switchTheme.Location = new Point(3, 64);
+            switchTheme.Margin = new Padding(0);
+            switchTheme.MouseLocation = new Point(-1, -1);
+            switchTheme.MouseState = MaterialSkin.MouseState.HOVER;
+            switchTheme.Name = "switchTheme";
+            switchTheme.Ripple = true;
+            switchTheme.Size = new Size(107, 37);
+            switchTheme.TabIndex = 0;
+            switchTheme.Text = "Theme";
+            switchTheme.UseVisualStyleBackColor = true;
+            switchTheme.CheckedChanged += switchTheme_CheckedChanged;
             // 
             // Main
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(switchTheme);
             Name = "Main";
             Text = "Transport checker";
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
+
+        private MaterialSkin.Controls.MaterialSwitch switchTheme;
     }
 }

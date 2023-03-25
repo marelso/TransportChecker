@@ -24,5 +24,10 @@ namespace TransportChecker
                 , MaterialSkin.TextShade.WHITE
                 );
         }
+
+        private void switchTheme_CheckedChanged(object sender, EventArgs e)
+        {
+            manager.Theme = switchTheme.Checked ? MaterialSkin.MaterialSkinManager.Themes.DARK : MaterialSkin.MaterialSkinManager.Themes.LIGHT;
+        }
     }
 }
