@@ -327,7 +327,7 @@
             btn_search.Depth = 0;
             btn_search.HighEmphasis = true;
             btn_search.Icon = null;
-            btn_search.Location = new Point(410, 46);
+            btn_search.Location = new Point(410, 97);
             btn_search.Margin = new Padding(4, 6, 4, 6);
             btn_search.MouseState = MaterialSkin.MouseState.HOVER;
             btn_search.Name = "btn_search";
@@ -361,6 +361,7 @@
             cb_destination.Size = new Size(180, 49);
             cb_destination.StartIndex = 0;
             cb_destination.TabIndex = 1;
+            cb_destination.Click += cb_destination_Click;
             // 
             // cb_origin
             // 
@@ -384,6 +385,7 @@
             cb_origin.Size = new Size(200, 49);
             cb_origin.StartIndex = 0;
             cb_origin.TabIndex = 0;
+            cb_origin.Click += cb_origin_Click;
             // 
             // materialExpansionPanel1
             // 
@@ -391,7 +393,7 @@
             materialExpansionPanel1.Collapse = true;
             materialExpansionPanel1.Depth = 0;
             materialExpansionPanel1.ExpandHeight = 200;
-            materialExpansionPanel1.Font = new Font("Roboto", 14F, FontStyle.Regular, GraphicsUnit.Pixel);
+            materialExpansionPanel1.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Regular, GraphicsUnit.Pixel);
             materialExpansionPanel1.ForeColor = Color.FromArgb(222, 0, 0, 0);
             materialExpansionPanel1.Location = new Point(61, 568);
             materialExpansionPanel1.Margin = new Padding(16, 1, 16, 0);

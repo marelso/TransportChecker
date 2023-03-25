@@ -112,5 +112,59 @@ namespace TransportChecker
                 throw new Exception("Error:\n datafile not found. Please check if you have any .csv file in your folder.");
             }
         }
+
+        private List<string> findAllCities()
+        {
+            List<string> result = new List<string>();
+
+            validateDatabaseFile();
+
+            List<string> list = File.ReadAllLines(this.source)[0].Split(';').ToList();
+            result.AddRange(list);
+
+            return result;
+        }
+
+        private int findDistanceBetweenCities(string origin, string destination)
+        {
+            validateDatabaseFile();
+
+            Dictionary<string, Dictionary<string, int>> distance = new Dictionary<string, Dictionary<string, int>>();
+            string[] rows = File.ReadAllLines(this.source);
+            string[] cities = rows[0].Split(';');
+
+            for (int row = 1; row < rows.Length; row++)
+            {
+                string[] values = rows[row].Trim().Split(';');
+
+                string start = cities[row - 1];
+
+                for (int column = 0; column < values.Length; column++)
+                {
+                    string destiny = cities[column];
+
+                    int kms = Convert.ToInt32(values[column]);
+
+                    if (!distance.ContainsKey(start))
+                    {
+                        distance[start] = new Dictionary<string, int>();
+                    }
+
+                    distance[start][destiny] = kms;
+                }
+            }
+
+            return distance[origin][destination];
+        }
+
+        private void cb_origin_Click(object sender, EventArgs e)
+        {
+            cb_origin.DataSource = findAllCities();
+        }
+
+        private void cb_destination_Click(object sender, EventArgs e)
+        {
+            cb_destination.DataSource = findAllCities();
+        }
     }
 }
