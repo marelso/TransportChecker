@@ -121,7 +121,6 @@
             txt_count.TabIndex = 15;
             txt_count.Text = "";
             txt_count.TrailingIcon = null;
-            txt_count.TextChanged += txtCheckTextChange;
             // 
             // list_product
             // 
@@ -219,7 +218,6 @@
             txt_weight.TabIndex = 10;
             txt_weight.Text = "";
             txt_weight.TrailingIcon = null;
-            txt_weight.TextChanged += txtCheckTextChange;
             // 
             // txt_product
             // 
@@ -238,7 +236,6 @@
             txt_product.TabIndex = 9;
             txt_product.Text = "";
             txt_product.TrailingIcon = null;
-            txt_product.TextChanged += txtCheckTextChange;
             // 
             // btn_add_card
             // 

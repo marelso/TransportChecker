@@ -85,9 +85,17 @@ namespace TransportChecker
             titleContainer.Dock = DockStyle.Top;
             titleContainer.FlowDirection = FlowDirection.LeftToRight;
 
-            var lbl_distance = createLabel($"lblDistance_{id}", "Distance: ");
+            var lblDistance = createLabel($"lblDistance_{id}", "Distance: ");
 
-            titleContainer.Controls.Add(lbl_distance);
+            var btnAddCard = new MaterialButton();
+            btnAddCard.Margin = new Padding(85, 0, 0, 0);
+            btnAddCard.Text = $"New delivery route";
+            btnAddCard.Name = $"btnAddCard_{id}";
+            btnAddCard.Enabled = false;
+
+            titleContainer.Controls.AddRange(new Control[] {
+                lblDistance, btnAddCard
+            });
             #endregion
 
             #region Top container
@@ -113,6 +121,33 @@ namespace TransportChecker
             middleContainer.Dock = DockStyle.Top;
             middleContainer.FlowDirection = FlowDirection.LeftToRight;
 
+            var textProduct = createTextBox($"text_product_{id}", $"Product", 185);
+            textProduct.TextChanged += new EventHandler(txtCheckTextChange);
+
+            var textWeight = createTextBox($"text_weight_{id}", $"Weight", 90);
+            textWeight.TextChanged += new EventHandler(txtCheckTextChange);
+
+            var textCount = createTextBox($"text_count_{id}", $"Count", 90);
+            textCount.TextChanged += new EventHandler(txtCheckTextChange);
+
+            var btnAdd = new MaterialButton();
+            btnAdd.Name = $"btnAdd_{id}";
+            btnAdd.Text = $"Add";
+            btnAdd.Enabled = false;
+            btnAdd.Click += new EventHandler(btnAddItemClick);
+
+            middleContainer.Controls.AddRange(new Control[] {
+                textProduct, textWeight, textCount, btnAdd
+            });
+            #endregion
+
+            #region Bottom
+            var bottomContainer = new FlowLayoutPanel();
+            bottomContainer.Name = $"flBottom_{id}";
+            bottomContainer.Height = containerHeight + 20;
+            bottomContainer.Dock = DockStyle.Top;
+            bottomContainer.FlowDirection = FlowDirection.LeftToRight;
+
             var cbVehicleType = createComboBox($"cbVehicleType_{id}", "Vehicle type", 185);
             //TODO CLICK
 
@@ -129,53 +164,36 @@ namespace TransportChecker
             btnSearch.Text = "Search";
             //TODO Click =
 
-            middleContainer.Controls.AddRange(new Control[] {
+            bottomContainer.Controls.AddRange(new Control[] {
                 cbVehicleType, textTotalCost, btnSearch
             });
             #endregion
 
-            #region Bottom
-            var bottomContainer = new FlowLayoutPanel();
-            bottomContainer.Name = $"flBottom_{id}";
-            bottomContainer.Height = containerHeight;
-            bottomContainer.Dock = DockStyle.Top;
-            bottomContainer.FlowDirection = FlowDirection.LeftToRight;
-
-            var textProduct = createTextBox($"text_product_{id}", $"Product", 185);
-            textProduct.TextChanged += new EventHandler(txtCheckTextChange);
-
-            var textWeight = createTextBox($"text_weight_{id}", $"Weight", 90);
-            textWeight.TextChanged += new EventHandler(txtCheckTextChange);
-
-            var textCount = createTextBox($"text_count_{id}", $"Count", 90);
-            textCount.TextChanged += new EventHandler(txtCheckTextChange);
-
-            var btnAdd = new MaterialButton();
-            btnAdd.Name = $"btnAdd_{id}";
-            btnAdd.Text = $"Add";
-            btnAdd.Enabled = false;
-            btnAdd.Click += new EventHandler(btnAddItemClick);
-
-            bottomContainer.Controls.AddRange(new Control[] {
-                textProduct, textWeight, textCount, btnAdd
-            });
-            #endregion
-
             #region Footer
-            var products = new MaterialListView();
-            products.Width = 230;
-            products.Name = $"list_{id}";
-            products.Columns.AddRange(new[] {
-                    new ColumnHeader { Text = "Product", Width = 85 },
-                    new ColumnHeader { Text = "Weight", Width = 80 },
-                    new ColumnHeader { Text = "Count", Width = 75 }
-                });
-
             var productsContainer = new FlowLayoutPanel();
             productsContainer.Dock = DockStyle.Fill;
             productsContainer.Name = $"fl_product_{id}";
             productsContainer.Height = containerHeight;
-            productsContainer.Controls.Add(products);
+
+            var products = new MaterialListView();
+
+            products.Width = 230;
+            products.Scrollable = true;
+            products.Name = $"list_{id}";
+            products.Columns.AddRange(new[] {
+                    new ColumnHeader { Text = "Product", Width = 95 },
+                    new ColumnHeader { Text = "Weight", Width = 60 },
+                    new ColumnHeader { Text = "Count", Width = 75 }
+                });
+
+            var btnSubmit = new MaterialButton();
+            btnSubmit.Margin = new Padding(145, 0, 0, 0);
+            btnSubmit.Name = $"btnSubmit_{id}";
+            btnSubmit.Text = $"Subtmit";
+            btnSubmit.Enabled = false;
+            //TODO CLICK
+
+            productsContainer.Controls.AddRange(new Control[] { products, btnSubmit });
             #endregion
 
             card.Controls.Add(productsContainer);
@@ -200,8 +218,8 @@ namespace TransportChecker
         {
             #region Initialize components
             var button = (MaterialButton)sender;
-            var parentPainel = (FlowLayoutPanel) button.Parent;
-            var parentCard = (MaterialCard) parentPainel.Parent;
+            var parentPainel = (FlowLayoutPanel)button.Parent;
+            var parentCard = (MaterialCard)parentPainel.Parent;
             var listParent = parentCard.Controls.OfType<FlowLayoutPanel>()
                 .FirstOrDefault(painel =>
                     painel.Name.ToLower().Contains("product")
