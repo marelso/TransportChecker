@@ -2,6 +2,8 @@ using MaterialSkin.Controls;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using TransportChecker.domain;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace TransportChecker
@@ -43,38 +45,227 @@ namespace TransportChecker
                 : MaterialSkin.MaterialSkinManager.Themes.LIGHT;
         }
 
-        private MaterialComboBox createComboBox(string name, string hint, int width)
+        private void btnAddItemClick(object sender, EventArgs e)
         {
-            MaterialComboBox comboBox = new MaterialComboBox();
+            #region Initialize components
+            var button = (MaterialButton)sender;
+            var parentPainel = (FlowLayoutPanel)button.Parent;
+            var parentCard = (MaterialCard)parentPainel.Parent;
+            var listParent = parentCard.Controls.OfType<FlowLayoutPanel>()
+                .FirstOrDefault(painel =>
+                    painel.Name.ToLower().Contains("product")
+                );
 
-            comboBox.Name = name;
-            comboBox.Hint = hint;
-            comboBox.Width = width;
+            var textProduct = parentPainel.Controls.OfType<MaterialTextBox>()
+                .FirstOrDefault(textBox =>
+                    textBox.Name.ToLower().Contains("product")
+                );
+            var textWeight = parentPainel.Controls.OfType<MaterialTextBox>()
+                .FirstOrDefault(textBox =>
+                    textBox.Name.ToLower().Contains("weight")
+                );
+            var textCount = parentPainel.Controls.OfType<MaterialTextBox>()
+                .FirstOrDefault(textBox =>
+                    textBox.Name.ToLower().Contains("count")
+                );
 
-            return comboBox;
+            var addButton = parentPainel.Controls
+                .OfType<MaterialButton>()
+                .First(button => button.Name.ToLower().Contains("add"));
+
+            var products = listParent.Controls
+                .OfType<MaterialListView>()
+                .First(list => list.Name.Contains("list"));
+            #endregion
+
+            double weight;
+            bool isWeightDouble = double.TryParse(textWeight.Text, out weight);
+
+            int count;
+            bool isCountInteger = int.TryParse(textCount.Text, out count);
+
+            if (isWeightDouble && isCountInteger)
+            {
+                var item = new ListViewItem(new string[] {
+                    textProduct.Text,
+                    textWeight.Text,
+                    textCount.Text
+                });
+
+                products.Items.Add(item);
+            }
+            else
+            {
+                MessageBox.Show("The weight should be an number.", "Error:");
+            }
         }
 
-        private MaterialLabel createLabel(string name, string text)
+        private List<City> findAllCities()
         {
-            MaterialLabel label = new MaterialLabel();
-            label.Name = name;
-            label.Text = text;
-            label.Width = 200;
+            validateDatabaseFile();
 
-            return label;
+            var result = new List<City>();
+            List<string> list = File.ReadAllLines(this.source)[0].Split(';').ToList();
+
+            for (int city = 0; city < list.Count; city++)
+                result.Add(new City(list[city], findDistanceBetweenCities(list[city])));
+
+            return result;
         }
 
-        private MaterialTextBox createTextBox(string name, string hint, int width)
+        private Dictionary<string, int> findDistanceBetweenCities(string origin)
         {
-            MaterialTextBox textBox = new MaterialTextBox();
+            validateDatabaseFile();
 
-            textBox.Name = name;
-            textBox.Hint = hint;
-            textBox.Width = width;
+            Dictionary<string, Dictionary<string, int>> distance = new Dictionary<string, Dictionary<string, int>>();
+            string[] rows = File.ReadAllLines(this.source);
+            string[] cities = rows[0].Split(';');
 
-            return textBox;
+            for (int row = 1; row < rows.Length; row++)
+            {
+                string[] values = rows[row].Trim().Split(';');
+
+                string start = cities[row - 1];
+
+                for (int column = 0; column < values.Length; column++)
+                {
+                    string destiny = cities[column];
+
+                    int kms = Convert.ToInt32(values[column]);
+
+                    if (!distance.ContainsKey(start))
+                    {
+                        distance[start] = new Dictionary<string, int>();
+                    }
+
+                    distance[start][destiny] = kms;
+                }
+            }
+
+            return distance[origin];
         }
 
+        private void cbVehicleSelectionChange(object sender, EventArgs e)
+        {
+            search();
+        }
+
+        private void btnSearchClick(object sender, EventArgs e)
+        {
+            search();
+        }
+
+        private void search()
+        {
+            #region Parents
+            var card = fl_main.Controls.OfType<MaterialCard>()
+                .FirstOrDefault(painel =>
+                    painel.Name.ToLower().Contains("card")
+                );
+
+            #region Title panel components
+            var titlePainel = card.Controls.OfType<FlowLayoutPanel>()
+                .FirstOrDefault(painel =>
+                    painel.Name.ToLower().Contains("title")
+                );
+            var label = titlePainel.Controls.OfType<MaterialLabel>()
+                .FirstOrDefault(textBox =>
+                    textBox.Name.ToLower().Contains("distance")
+                );
+            #endregion
+
+            #region Top panel components
+            var topPainel = card.Controls.OfType<FlowLayoutPanel>()
+                .FirstOrDefault(painel =>
+                    painel.Name.ToLower().Contains("top")
+                );
+            var origin = topPainel.Controls.OfType<MaterialComboBox>()
+                .FirstOrDefault(painel =>
+                    painel.Name.ToLower().Contains("cborigin")
+                );
+            var destination = topPainel.Controls.OfType<MaterialComboBox>()
+                .FirstOrDefault(painel =>
+                    painel.Name.ToLower().Contains("cbdestination")
+                );
+            #endregion
+
+            #region Middle panel components
+            var middlePainel = card.Controls.OfType<FlowLayoutPanel>()
+                .FirstOrDefault(painel =>
+                    painel.Name.ToLower().Contains("middle")
+                );
+            var textTotalCost = middlePainel.Controls.OfType<MaterialMaskedTextBox>()
+                .FirstOrDefault(textBox =>
+                    textBox.Name.ToLower().Contains("cost")
+            );
+            var comboBox = middlePainel.Controls.OfType<MaterialComboBox>()
+                .FirstOrDefault(painel =>
+                    painel.Name.ToLower().Contains("cbvehicletype")
+                );
+            #endregion
+            #endregion
+
+            if (origin != null && destination != null)
+            {
+                City originCity = (City)origin.SelectedItem;
+                City destinationCity = (City)destination.SelectedItem;
+                VehicleType vehicleType = (VehicleType)comboBox.SelectedItem;
+
+                if (!string.IsNullOrEmpty(originCity.name) && !string.IsNullOrEmpty(destinationCity.name))
+                {
+                    var distance = originCity.findDistanceBetweenCities(destinationCity.name);
+                    var vehicle = new Vehicle(vehicleType);
+                    var cost = distance * vehicle.costPerKm;
+
+                    label.Text = $"Distance: {distance}";
+                    textTotalCost.Text = cost.ToString("N2");
+                }
+            }
+        }
+
+        private void txtCheckTextChange(object sender, EventArgs e)
+        {
+            var changedTextBox = (MaterialTextBox)sender;
+            var parentPainel = (FlowLayoutPanel)changedTextBox.Parent;
+
+            var textBoxes = parentPainel.Controls
+                .OfType<MaterialTextBox>()
+                .Where(textBox =>
+                    textBox.Name.ToLower().Contains("product") ||
+                    textBox.Name.ToLower().Contains("weight") ||
+                    textBox.Name.ToLower().Contains("count"))
+                .ToList();
+
+            var addButton = parentPainel.Controls
+                .OfType<MaterialButton>()
+                .First(button => button.Name.ToLower().Contains("add"));
+
+            var thereIsAnyEmptyTextBox = textBoxes.FirstOrDefault(x => string.IsNullOrEmpty(x.Text)) == null;
+
+            if (thereIsAnyEmptyTextBox)
+            {
+                addButton.Enabled = true;
+            }
+            else
+            {
+                addButton.Enabled = false;
+            }
+        }
+
+        private int getCardCount()
+        {
+            return fl_main.Controls.OfType<MaterialCard>().Count();
+        }
+
+        private void validateDatabaseFile()
+        {
+            if (!File.Exists(this.source))
+            {
+                throw new Exception("Error:\n datafile not found. Please check if you have any .csv file in your folder.");
+            }
+        }
+
+        #region Factories
         private MaterialCard includeCard(int id)
         {
             var card = new MaterialCard();
@@ -112,10 +303,10 @@ namespace TransportChecker
             topContainer.FlowDirection = FlowDirection.LeftToRight;
 
             var origin = createComboBox($"cbOrigin_{id}", "Origin", 185);
-            origin.Click += new EventHandler(cbLocationClick);
+            origin.DataSource = findAllCities();
 
             var destination = createComboBox($"cbDestination_{id}", "Destination", 185);
-            destination.Click += new EventHandler(cbLocationClick);
+            destination.DataSource = findAllCities();
 
             topContainer.Controls.AddRange(new Control[] { origin, destination });
             #endregion
@@ -128,7 +319,8 @@ namespace TransportChecker
             middleContainer.FlowDirection = FlowDirection.LeftToRight;
 
             var cbVehicleType = createComboBox($"cbVehicleType_{id}", "Vehicle type", 185);
-            //TODO CLICK
+            cbVehicleType.DataSource = populateVehicleType();
+            cbVehicleType.SelectedIndexChanged += new EventHandler(cbVehicleSelectionChange);
 
             var textTotalCost = new MaterialMaskedTextBox();
             textTotalCost.Name = $"textTotalCost_{id}";
@@ -136,12 +328,12 @@ namespace TransportChecker
             textTotalCost.PrefixSuffix = MaterialMaskedTextBox.PrefixSuffixTypes.Prefix;
             textTotalCost.PrefixSuffixText = "R$";
             textTotalCost.Width = 185;
-            textTotalCost.Enabled = false;
+            textTotalCost.ReadOnly = true;
 
             var btnSearch = new MaterialButton();
             btnSearch.Name = $"btnSearch_{id}";
             btnSearch.Text = "Search";
-            //TODO Click =
+            btnSearch.Click += new EventHandler(btnSearchClick);
 
             middleContainer.Controls.AddRange(new Control[] {
                 cbVehicleType, textTotalCost, btnSearch
@@ -213,156 +405,42 @@ namespace TransportChecker
             return card;
         }
 
-        private void btn_add_card_Click(object sender, EventArgs e)
+        private Array populateVehicleType()
         {
-            
+            return Enum.GetValues(typeof(VehicleType));
         }
 
-        private void btnAddItemClick(object sender, EventArgs e)
+        private MaterialComboBox createComboBox(string name, string hint, int width)
         {
-            #region Initialize components
-            var button = (MaterialButton)sender;
-            var parentPainel = (FlowLayoutPanel)button.Parent;
-            var parentCard = (MaterialCard)parentPainel.Parent;
-            var listParent = parentCard.Controls.OfType<FlowLayoutPanel>()
-                .FirstOrDefault(painel =>
-                    painel.Name.ToLower().Contains("product")
-                );
+            MaterialComboBox comboBox = new MaterialComboBox();
 
-            var textProduct = parentPainel.Controls.OfType<MaterialTextBox>()
-                .FirstOrDefault(textBox =>
-                    textBox.Name.ToLower().Contains("product")
-                );
-            var textWeight = parentPainel.Controls.OfType<MaterialTextBox>()
-                .FirstOrDefault(textBox =>
-                    textBox.Name.ToLower().Contains("weight")
-                );
-            var textCount = parentPainel.Controls.OfType<MaterialTextBox>()
-                .FirstOrDefault(textBox =>
-                    textBox.Name.ToLower().Contains("count")
-                );
+            comboBox.Name = name;
+            comboBox.Hint = hint;
+            comboBox.Width = width;
 
-            var addButton = parentPainel.Controls
-                .OfType<MaterialButton>()
-                .First(button => button.Name.ToLower().Contains("add"));
-
-            var products = listParent.Controls
-                .OfType<MaterialListView>()
-                .First(list => list.Name.Contains("list"));
-            #endregion
-
-            double weight;
-            bool isWeightDouble = double.TryParse(textWeight.Text, out weight);
-
-            int count;
-            bool isCountInteger = int.TryParse(textCount.Text, out count);
-
-            if (isWeightDouble && isCountInteger)
-            {
-                var item = new ListViewItem(new string[] {
-                    textProduct.Text,
-                    textWeight.Text,
-                    textCount.Text
-                });
-
-                products.Items.Add(item);
-            }
-            else
-            {
-                MessageBox.Show("The weight should be an number.", "Error:");
-            }
+            return comboBox;
         }
 
-        private void validateDatabaseFile()
+        private MaterialLabel createLabel(string name, string text)
         {
-            if (!File.Exists(this.source))
-            {
-                throw new Exception("Error:\n datafile not found. Please check if you have any .csv file in your folder.");
-            }
+            MaterialLabel label = new MaterialLabel();
+            label.Name = name;
+            label.Text = text;
+            label.Width = 200;
+
+            return label;
         }
 
-        private List<string> findAllCities()
+        private MaterialTextBox createTextBox(string name, string hint, int width)
         {
-            List<string> result = new List<string>();
+            MaterialTextBox textBox = new MaterialTextBox();
 
-            validateDatabaseFile();
+            textBox.Name = name;
+            textBox.Hint = hint;
+            textBox.Width = width;
 
-            List<string> list = File.ReadAllLines(this.source)[0].Split(';').ToList();
-            result.AddRange(list);
-
-            return result;
+            return textBox;
         }
-
-        private int findDistanceBetweenCities(string origin, string destination)
-        {
-            validateDatabaseFile();
-
-            Dictionary<string, Dictionary<string, int>> distance = new Dictionary<string, Dictionary<string, int>>();
-            string[] rows = File.ReadAllLines(this.source);
-            string[] cities = rows[0].Split(';');
-
-            for (int row = 1; row < rows.Length; row++)
-            {
-                string[] values = rows[row].Trim().Split(';');
-
-                string start = cities[row - 1];
-
-                for (int column = 0; column < values.Length; column++)
-                {
-                    string destiny = cities[column];
-
-                    int kms = Convert.ToInt32(values[column]);
-
-                    if (!distance.ContainsKey(start))
-                    {
-                        distance[start] = new Dictionary<string, int>();
-                    }
-
-                    distance[start][destiny] = kms;
-                }
-            }
-
-            return distance[origin][destination];
-        }
-
-        private void cbLocationClick(object sender, EventArgs e)
-        {
-            var comboBox = (MaterialComboBox)sender;
-            comboBox.DataSource = findAllCities();
-        }
-
-        private void txtCheckTextChange(object sender, EventArgs e)
-        {
-            var changedTextBox = (MaterialTextBox)sender;
-            var parentPainel = (FlowLayoutPanel)changedTextBox.Parent;
-
-            var textBoxes = parentPainel.Controls
-                .OfType<MaterialTextBox>()
-                .Where(textBox =>
-                    textBox.Name.ToLower().Contains("product") ||
-                    textBox.Name.ToLower().Contains("weight") ||
-                    textBox.Name.ToLower().Contains("count"))
-                .ToList();
-
-            var addButton = parentPainel.Controls
-                .OfType<MaterialButton>()
-                .First(button => button.Name.ToLower().Contains("add"));
-
-            var thereIsAnyEmptyTextBox = textBoxes.FirstOrDefault(x => string.IsNullOrEmpty(x.Text)) == null;
-
-            if (thereIsAnyEmptyTextBox)
-            {
-                addButton.Enabled = true;
-            }
-            else
-            {
-                addButton.Enabled = false;
-            }
-        }
-
-        private int getCardCount()
-        {
-            return fl_main.Controls.OfType<MaterialCard>().Count();
-        }        
+        #endregion
     }
 }
