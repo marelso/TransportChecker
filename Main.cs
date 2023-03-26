@@ -28,6 +28,12 @@ namespace TransportChecker
                 , MaterialSkin.Accent.DeepOrange200
                 , MaterialSkin.TextShade.WHITE
                 );
+
+            var count = getCardCount();
+            var card = includeCard(count + 1);
+            fl_main.Controls.Add(card);
+
+            card.Focus();
         }
 
         private void switchTheme_CheckedChanged(object sender, EventArgs e)
@@ -207,11 +213,7 @@ namespace TransportChecker
 
         private void btn_add_card_Click(object sender, EventArgs e)
         {
-            var count = getCardCount();
-            var card = includeCard(count + 1);
-            fl_main.Controls.Add(card);
-
-            card.Focus();
+            
         }
 
         private void btnAddItemClick(object sender, EventArgs e)
@@ -327,16 +329,6 @@ namespace TransportChecker
             comboBox.DataSource = findAllCities();
         }
 
-        private void cb_origin_Click(object sender, EventArgs e)
-        {
-            cb_origin.DataSource = findAllCities();
-        }
-
-        private void cb_destination_Click(object sender, EventArgs e)
-        {
-            cb_destination.DataSource = findAllCities();
-        }
-
         private void txtCheckTextChange(object sender, EventArgs e)
         {
             var changedTextBox = (MaterialTextBox)sender;
@@ -369,6 +361,6 @@ namespace TransportChecker
         private int getCardCount()
         {
             return fl_main.Controls.OfType<MaterialCard>().Count();
-        }
+        }        
     }
 }
