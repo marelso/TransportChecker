@@ -72,10 +72,11 @@
             // 
             fl_main.AutoScroll = true;
             fl_main.Controls.Add(card_first);
-            fl_main.Location = new Point(61, 104);
+            fl_main.Location = new Point(54, 108);
             fl_main.Name = "fl_main";
-            fl_main.Size = new Size(531, 445);
+            fl_main.Size = new Size(567, 365);
             fl_main.TabIndex = 1;
+            fl_main.WrapContents = false;
             // 
             // card_first
             // 
@@ -120,7 +121,7 @@
             txt_count.TabIndex = 15;
             txt_count.Text = "";
             txt_count.TrailingIcon = null;
-            txt_count.TextChanged += txt_count_TextChanged;
+            txt_count.TextChanged += txtCheckTextChange;
             // 
             // list_product
             // 
@@ -176,7 +177,6 @@
             btn_add_item.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             btn_add_item.UseAccentColor = false;
             btn_add_item.UseVisualStyleBackColor = true;
-            btn_add_item.Click += btn_add_item_Click;
             // 
             // lbl_distance
             // 
@@ -219,7 +219,7 @@
             txt_weight.TabIndex = 10;
             txt_weight.Text = "";
             txt_weight.TrailingIcon = null;
-            txt_weight.TextChanged += txt_weight_TextChanged;
+            txt_weight.TextChanged += txtCheckTextChange;
             // 
             // txt_product
             // 
@@ -238,7 +238,7 @@
             txt_product.TabIndex = 9;
             txt_product.Text = "";
             txt_product.TrailingIcon = null;
-            txt_product.TextChanged += txt_product_TextChanged;
+            txt_product.TextChanged += txtCheckTextChange;
             // 
             // btn_add_card
             // 
@@ -395,7 +395,7 @@
             materialExpansionPanel1.ExpandHeight = 200;
             materialExpansionPanel1.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Regular, GraphicsUnit.Pixel);
             materialExpansionPanel1.ForeColor = Color.FromArgb(222, 0, 0, 0);
-            materialExpansionPanel1.Location = new Point(61, 568);
+            materialExpansionPanel1.Location = new Point(54, 477);
             materialExpansionPanel1.Margin = new Padding(16, 1, 16, 0);
             materialExpansionPanel1.MouseState = MaterialSkin.MouseState.HOVER;
             materialExpansionPanel1.Name = "materialExpansionPanel1";
