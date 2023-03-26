@@ -127,33 +127,6 @@ namespace TransportChecker
             middleContainer.Dock = DockStyle.Top;
             middleContainer.FlowDirection = FlowDirection.LeftToRight;
 
-            var textProduct = createTextBox($"text_product_{id}", $"Product", 185);
-            textProduct.TextChanged += new EventHandler(txtCheckTextChange);
-
-            var textWeight = createTextBox($"text_weight_{id}", $"Weight", 90);
-            textWeight.TextChanged += new EventHandler(txtCheckTextChange);
-
-            var textCount = createTextBox($"text_count_{id}", $"Count", 90);
-            textCount.TextChanged += new EventHandler(txtCheckTextChange);
-
-            var btnAdd = new MaterialButton();
-            btnAdd.Name = $"btnAdd_{id}";
-            btnAdd.Text = $"Add";
-            btnAdd.Enabled = false;
-            btnAdd.Click += new EventHandler(btnAddItemClick);
-
-            middleContainer.Controls.AddRange(new Control[] {
-                textProduct, textWeight, textCount, btnAdd
-            });
-            #endregion
-
-            #region Bottom
-            var bottomContainer = new FlowLayoutPanel();
-            bottomContainer.Name = $"flBottom_{id}";
-            bottomContainer.Height = containerHeight + 20;
-            bottomContainer.Dock = DockStyle.Top;
-            bottomContainer.FlowDirection = FlowDirection.LeftToRight;
-
             var cbVehicleType = createComboBox($"cbVehicleType_{id}", "Vehicle type", 185);
             //TODO CLICK
 
@@ -170,8 +143,37 @@ namespace TransportChecker
             btnSearch.Text = "Search";
             //TODO Click =
 
-            bottomContainer.Controls.AddRange(new Control[] {
+            middleContainer.Controls.AddRange(new Control[] {
                 cbVehicleType, textTotalCost, btnSearch
+            });
+            #endregion
+
+            #region Bottom
+            var bottomContainer = new FlowLayoutPanel();
+            bottomContainer.Name = $"flBottom_{id}";
+            bottomContainer.Height = containerHeight + 20;
+            bottomContainer.Dock = DockStyle.Top;
+            bottomContainer.FlowDirection = FlowDirection.LeftToRight;
+
+
+
+            var textProduct = createTextBox($"text_product_{id}", $"Product", 185);
+            textProduct.TextChanged += new EventHandler(txtCheckTextChange);
+
+            var textWeight = createTextBox($"text_weight_{id}", $"Weight", 90);
+            textWeight.TextChanged += new EventHandler(txtCheckTextChange);
+
+            var textCount = createTextBox($"text_count_{id}", $"Count", 90);
+            textCount.TextChanged += new EventHandler(txtCheckTextChange);
+
+            var btnAdd = new MaterialButton();
+            btnAdd.Name = $"btnAdd_{id}";
+            btnAdd.Text = $"Add";
+            btnAdd.Enabled = false;
+            btnAdd.Click += new EventHandler(btnAddItemClick);
+
+            bottomContainer.Controls.AddRange(new Control[] {
+                textProduct, textWeight, textCount, btnAdd
             });
             #endregion
 
