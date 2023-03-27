@@ -147,20 +147,26 @@ namespace TransportChecker
 
         private void cbVehicleSelectionChange(object sender, EventArgs e)
         {
-            search();
+            var comboBox = (MaterialComboBox)sender;
+            var id = Convert.ToInt32(comboBox.Name[comboBox.Name.Length - 1].ToString());
+
+            search(id);
         }
 
         private void btnSearchClick(object sender, EventArgs e)
         {
-            search();
+            var btn = (MaterialButton)sender;
+            var id = Convert.ToInt32(btn.Name[btn.Name.Length - 1].ToString());
+
+            search(id);
         }
 
-        private void search()
+        private void search(int id)
         {
             #region Parents
             var card = fl_main.Controls.OfType<MaterialCard>()
                 .FirstOrDefault(painel =>
-                    painel.Name.ToLower().Contains("card")
+                    painel.Name.ToLower().Contains($"card_{id}")
                 );
 
             #region Title panel components
@@ -265,6 +271,29 @@ namespace TransportChecker
             }
         }
 
+        private void btnNewRoute_Click(object sender, EventArgs e)
+        {
+            MaterialButton btn = (MaterialButton)sender;
+
+            MaterialCard newCard = includeCard(getCardCount() + 1);
+
+            ComboBox? lastDestination = fl_main.Controls.Find($"cbDestination_{getCardCount()}", true).FirstOrDefault() as ComboBox;
+            ComboBox? origin = newCard.Controls.Find($"cbOrigin_{getCardCount() + 1}", true).FirstOrDefault() as ComboBox;
+
+            if (lastDestination != null)
+            {
+                if (origin != null)
+                {
+                    fl_main.Controls.Add(newCard);
+                    origin.DataSource = lastDestination.DataSource;
+                    origin.SelectedItem = lastDestination.SelectedItem;
+                    origin.Enabled = false;
+                    newCard.Focus();
+                }
+            }
+        }
+
+
         #region Factories
         private MaterialCard includeCard(int id)
         {
@@ -273,34 +302,23 @@ namespace TransportChecker
             card.Width = 500;
             card.Height = 320;
 
-            int containerHeight = 50;
-
             #region Title
-            var titleContainer = new FlowLayoutPanel();
-            titleContainer.Name = $"flTitle_{id}";
-            titleContainer.Height = containerHeight;
-            titleContainer.Dock = DockStyle.Top;
-            titleContainer.FlowDirection = FlowDirection.LeftToRight;
-
+            var titleContainer = createLayout($"flTitle_{id}", DockStyle.Top);
             var lblDistance = createLabel($"lblDistance_{id}", "Distance: ");
 
-            var btnAddCard = new MaterialButton();
-            btnAddCard.Margin = new Padding(85, 0, 0, 0);
-            btnAddCard.Text = $"New delivery route";
-            btnAddCard.Name = $"btnAddCard_{id}";
-            btnAddCard.Enabled = false;
+            var btnAddRoute = new MaterialButton();
+            btnAddRoute.Margin = new Padding(85, 0, 0, 0);
+            btnAddRoute.Text = $"New delivery route";
+            btnAddRoute.Name = $"btnAddCard_{id}";
+            btnAddRoute.Click += new EventHandler(btnNewRoute_Click);
 
             titleContainer.Controls.AddRange(new Control[] {
-                lblDistance, btnAddCard
+                lblDistance, btnAddRoute
             });
             #endregion
 
             #region Top container
-            var topContainer = new FlowLayoutPanel();
-            topContainer.Name = $"flTop_{id}";
-            topContainer.Height = containerHeight;
-            topContainer.Dock = DockStyle.Top;
-            topContainer.FlowDirection = FlowDirection.LeftToRight;
+            var topContainer = createLayout($"flTop_{id}", DockStyle.Top);
 
             var origin = createComboBox($"cbOrigin_{id}", "Origin", 185);
             origin.DataSource = findAllCities();
@@ -312,11 +330,7 @@ namespace TransportChecker
             #endregion
 
             #region Middle
-            var middleContainer = new FlowLayoutPanel();
-            middleContainer.Name = $"flMiddle_{id}";
-            middleContainer.Height = containerHeight;
-            middleContainer.Dock = DockStyle.Top;
-            middleContainer.FlowDirection = FlowDirection.LeftToRight;
+            var middleContainer = createLayout($"flMiddle_{id}", DockStyle.Top);
 
             var cbVehicleType = createComboBox($"cbVehicleType_{id}", "Vehicle type", 185);
             cbVehicleType.DataSource = populateVehicleType();
@@ -341,13 +355,7 @@ namespace TransportChecker
             #endregion
 
             #region Bottom
-            var bottomContainer = new FlowLayoutPanel();
-            bottomContainer.Name = $"flBottom_{id}";
-            bottomContainer.Height = containerHeight + 20;
-            bottomContainer.Dock = DockStyle.Top;
-            bottomContainer.FlowDirection = FlowDirection.LeftToRight;
-
-
+            var bottomContainer = createLayout($"flBottom_{id}", DockStyle.Top);
 
             var textProduct = createTextBox($"text_product_{id}", $"Product", 185);
             textProduct.TextChanged += new EventHandler(txtCheckTextChange);
@@ -370,10 +378,7 @@ namespace TransportChecker
             #endregion
 
             #region Footer
-            var productsContainer = new FlowLayoutPanel();
-            productsContainer.Dock = DockStyle.Fill;
-            productsContainer.Name = $"fl_product_{id}";
-            productsContainer.Height = containerHeight;
+            var productsContainer = createLayout($"fl_product_{id}", DockStyle.Fill);
 
             var products = new MaterialListView();
 
@@ -408,6 +413,17 @@ namespace TransportChecker
         private Array populateVehicleType()
         {
             return Enum.GetValues(typeof(VehicleType));
+        }
+
+        private FlowLayoutPanel createLayout(string name, DockStyle style)
+        {
+            var container = new FlowLayoutPanel();
+            container.Name = name;
+            container.Height = 60;
+            container.Dock = style;
+            container.FlowDirection = FlowDirection.LeftToRight;
+
+            return container;
         }
 
         private MaterialComboBox createComboBox(string name, string hint, int width)
