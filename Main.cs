@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Forms;
 using TransportChecker.domain;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
@@ -49,6 +50,9 @@ namespace TransportChecker
         {
             #region Initialize components
             var button = (MaterialButton)sender;
+            var id = Convert.ToInt32(button.Name[button.Name.Length - 1].ToString());
+            var btnAddRoute = fl_main.Controls.Find($"btnAddCard_{id}", true).FirstOrDefault() as MaterialButton;
+            var btnSubmit = fl_main.Controls.Find($"btnSubmit_{id}", true).FirstOrDefault() as MaterialButton;
             var parentPainel = (FlowLayoutPanel)button.Parent;
             var parentCard = (MaterialCard)parentPainel.Parent;
             var listParent = parentCard.Controls.OfType<FlowLayoutPanel>()
@@ -93,6 +97,12 @@ namespace TransportChecker
                 });
 
                 products.Items.Add(item);
+
+                if (products.Items.Count > 0)
+                {
+                    btnAddRoute.Enabled = true;
+                    btnSubmit.Enabled = true;
+                }
             }
             else
             {
@@ -155,7 +165,7 @@ namespace TransportChecker
 
         private void btnSearchClick(object sender, EventArgs e)
         {
-            var btn = (MaterialButton)sender;
+            var btn = sender as MaterialButton;
             var id = Convert.ToInt32(btn.Name[btn.Name.Length - 1].ToString());
 
             search(id);
@@ -165,9 +175,9 @@ namespace TransportChecker
         {
             #region Parents
             var card = fl_main.Controls.OfType<MaterialCard>()
-                .FirstOrDefault(painel =>
-                    painel.Name.ToLower().Contains($"card_{id}")
-                );
+                  .FirstOrDefault(painel =>
+                      painel.Name.ToLower().Contains($"card_{id}")
+                  );
 
             #region Title panel components
             var titlePainel = card.Controls.OfType<FlowLayoutPanel>()
@@ -273,13 +283,14 @@ namespace TransportChecker
 
         private void btnNewRoute_Click(object sender, EventArgs e)
         {
-            MaterialButton btn = (MaterialButton)sender;
-
             MaterialCard newCard = includeCard(getCardCount() + 1);
 
-            ComboBox? lastDestination = fl_main.Controls.Find($"cbDestination_{getCardCount()}", true).FirstOrDefault() as ComboBox;
+            MaterialButton btn = (MaterialButton)sender;                        
+            MaterialButton? btnSubmit = fl_main.Controls.Find($"btnSubmit_{getCardCount()}", true).FirstOrDefault() as MaterialButton;
+            
             ComboBox? origin = newCard.Controls.Find($"cbOrigin_{getCardCount() + 1}", true).FirstOrDefault() as ComboBox;
-
+            ComboBox? lastDestination = fl_main.Controls.Find($"cbDestination_{getCardCount()}", true).FirstOrDefault() as ComboBox;
+            
             if (lastDestination != null)
             {
                 if (origin != null)
@@ -288,6 +299,8 @@ namespace TransportChecker
                     origin.DataSource = lastDestination.DataSource;
                     origin.SelectedItem = lastDestination.SelectedItem;
                     origin.Enabled = false;
+                    btn.Enabled = false;
+                    btnSubmit.Enabled = false;
                     newCard.Focus();
                 }
             }
@@ -300,7 +313,7 @@ namespace TransportChecker
             var card = new MaterialCard();
             card.Name = $"card_{id}";
             card.Width = 500;
-            card.Height = 320;
+            card.Height = 350;
 
             #region Title
             var titleContainer = createLayout($"flTitle_{id}", DockStyle.Top);
@@ -311,6 +324,7 @@ namespace TransportChecker
             btnAddRoute.Text = $"New delivery route";
             btnAddRoute.Name = $"btnAddCard_{id}";
             btnAddRoute.Click += new EventHandler(btnNewRoute_Click);
+            btnAddRoute.Enabled = false;
 
             titleContainer.Controls.AddRange(new Control[] {
                 lblDistance, btnAddRoute
@@ -382,7 +396,7 @@ namespace TransportChecker
 
             var products = new MaterialListView();
 
-            products.Width = 230;
+            products.Width = 255;
             products.Scrollable = true;
             products.Name = $"list_{id}";
             products.Columns.AddRange(new[] {
@@ -392,7 +406,7 @@ namespace TransportChecker
                 });
 
             var btnSubmit = new MaterialButton();
-            btnSubmit.Margin = new Padding(145, 0, 0, 0);
+            btnSubmit.Margin = new Padding(115, 0, 0, 0);
             btnSubmit.Name = $"btnSubmit_{id}";
             btnSubmit.Text = $"Subtmit";
             btnSubmit.Enabled = false;
@@ -415,11 +429,11 @@ namespace TransportChecker
             return Enum.GetValues(typeof(VehicleType));
         }
 
-        private FlowLayoutPanel createLayout(string name, DockStyle style)
+        private FlowLayoutPanel createLayout(string name, DockStyle style, int height = 60)
         {
             var container = new FlowLayoutPanel();
             container.Name = name;
-            container.Height = 60;
+            container.Height = height;
             container.Dock = style;
             container.FlowDirection = FlowDirection.LeftToRight;
 
