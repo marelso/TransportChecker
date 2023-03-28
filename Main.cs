@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using TransportChecker.domain;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace TransportChecker
@@ -31,12 +32,6 @@ namespace TransportChecker
                 , MaterialSkin.Accent.DeepOrange200
                 , MaterialSkin.TextShade.WHITE
                 );
-
-            var count = getCardCount();
-            var card = includeCard(count + 1);
-            fl_main.Controls.Add(card);
-
-            card.Focus();
         }
 
         private void switchTheme_CheckedChanged(object sender, EventArgs e)
@@ -285,12 +280,12 @@ namespace TransportChecker
         {
             MaterialCard newCard = includeCard(getCardCount() + 1);
 
-            MaterialButton btn = (MaterialButton)sender;                        
+            MaterialButton btn = (MaterialButton)sender;
             MaterialButton? btnSubmit = fl_main.Controls.Find($"btnSubmit_{getCardCount()}", true).FirstOrDefault() as MaterialButton;
-            
-            ComboBox? origin = newCard.Controls.Find($"cbOrigin_{getCardCount() + 1}", true).FirstOrDefault() as ComboBox;
-            ComboBox? lastDestination = fl_main.Controls.Find($"cbDestination_{getCardCount()}", true).FirstOrDefault() as ComboBox;
-            
+
+            MaterialComboBox? origin = newCard.Controls.Find($"cbOrigin_{getCardCount() + 1}", true).FirstOrDefault() as MaterialComboBox;
+            MaterialComboBox? lastDestination = fl_main.Controls.Find($"cbDestination_{getCardCount()}", true).FirstOrDefault() as MaterialComboBox;
+
             if (lastDestination != null)
             {
                 if (origin != null)
@@ -472,5 +467,116 @@ namespace TransportChecker
             return textBox;
         }
         #endregion
+
+        #region Transaction events
+        private void btnInsertProductClick(object sender, EventArgs e)
+        {
+            var btnSelectRoute = card_transaction.Controls.Find($"btn_selectRoutes", true).FirstOrDefault() as MaterialButton;
+            var btnRemove = card_transaction.Controls.Find($"btn_removeProduct", true).FirstOrDefault() as MaterialButton;
+            var productList = card_transaction.Controls.Find($"list_totalProducts", true).FirstOrDefault() as MaterialListView;
+            var textProduct = card_transaction.Controls.Find($"text_product", true).FirstOrDefault() as MaterialTextBox;
+            var textWeight = card_transaction.Controls.Find($"text_weight", true).FirstOrDefault() as MaterialTextBox;
+            var textCount = card_transaction.Controls.Find($"text_count", true).FirstOrDefault() as MaterialTextBox;
+
+            var product = new Product(
+                textProduct.Text,
+                Convert.ToDouble(textWeight.Text),
+                Convert.ToInt32(textCount.Text)
+            );
+
+            if (product.isFilled())
+            {
+                var item = new ListViewItem(new[] { product.name, product.weight.ToString(), product.count.ToString() });
+                item.Tag = product;
+
+                productList.Items.Add(item);
+            }
+
+            if (productList != null || productList.Items.Count > 0)
+            {
+                btnRemove.Enabled = true;
+                btnSelectRoute.Enabled = true;
+
+            }
+        }
+        private void btnRemoveProductClick(object sender, EventArgs e)
+        {
+            var btnSender = sender as MaterialButton;
+            var btnSelectRoute = card_transaction.Controls.Find($"btn_selectRoutes", true).FirstOrDefault() as MaterialButton;
+            var productList = card_transaction.Controls.Find($"list_totalProducts", true).FirstOrDefault() as MaterialListView;
+            var textProduct = card_transaction.Controls.Find($"text_product", true).FirstOrDefault() as MaterialTextBox;
+
+            if (productList.Items.Count > 0 && !string.IsNullOrEmpty(textProduct.Text))
+            {
+                foreach (ListViewItem item in productList.Items)
+                {
+                    var itemProduct = (Product)item.Tag;
+
+                    if (itemProduct.name == textProduct.Text)
+                    {
+                        productList.Items.Remove(item);
+                    }
+                }
+            }
+
+            if (productList == null || productList.Items.Count == 0)
+            {
+                btnSender.Enabled = false;
+                btnSelectRoute.Enabled = false;
+            }
+        }
+        private void productTextChanged(object sender, EventArgs e)
+        {
+            var btnSender = sender as MaterialTextBox;
+            var btnAdd = card_transaction.Controls.Find($"btn_insertProduct", true).FirstOrDefault() as MaterialButton;
+            var textProduct = card_transaction.Controls.Find($"text_product", true).FirstOrDefault() as MaterialTextBox;
+            var textWeight = card_transaction.Controls.Find($"text_weight", true).FirstOrDefault() as MaterialTextBox;
+            var textCount = card_transaction.Controls.Find($"text_count", true).FirstOrDefault() as MaterialTextBox;
+
+            if (!string.IsNullOrEmpty(textProduct.Text)
+                && !string.IsNullOrEmpty(textWeight.Text)
+                && !string.IsNullOrEmpty(textCount.Text))
+            {
+
+                btnAdd.Enabled = true;
+            }
+            else
+            {
+                btnAdd.Enabled = false;
+            }
+        }
+        private void btnResetClick(object sender, EventArgs e)
+        {
+            var btnRemove = card_transaction.Controls.Find($"btn_removeProduct", true).FirstOrDefault() as MaterialButton;
+            var btnSelectRoute = card_transaction.Controls.Find($"btn_selectRoutes", true).FirstOrDefault() as MaterialButton;
+            var productList = card_transaction.Controls.Find($"list_totalProducts", true).FirstOrDefault() as MaterialListView;
+            var textProduct = card_transaction.Controls.Find($"text_product", true).FirstOrDefault() as MaterialTextBox;
+            var textWeight = card_transaction.Controls.Find($"text_weight", true).FirstOrDefault() as MaterialTextBox;
+            var textCount = card_transaction.Controls.Find($"text_count", true).FirstOrDefault() as MaterialTextBox;
+            var textCompanyName = card_transaction.Controls.Find($"text_companyName", true).FirstOrDefault() as MaterialTextBox;
+
+            textCompanyName.ResetText();
+            textProduct.ResetText();
+            textWeight.ResetText();
+            textCount.ResetText();
+
+            productList.Items.Clear();
+
+            btnRemove.Enabled = false;
+            btnSelectRoute.Enabled = false;
+            fl_main.Controls.Clear();
+
+            card_transaction.Focus();
+        }
+        private void btnSelectRoutesClick(object sender, EventArgs e)
+        {
+            var card = includeCard(1);
+
+            fl_main.Controls.Add(card);
+
+            card.Focus();
+        }
+        #endregion
+
     }
 }
