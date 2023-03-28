@@ -1,4 +1,5 @@
 using MaterialSkin.Controls;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
@@ -80,7 +81,6 @@ namespace TransportChecker
             return new int[] { countLow, countMid, countHigh };
         }
 
-
         #region Route events
         private void btnAddItemClick(object sender, EventArgs e)
         {
@@ -91,10 +91,9 @@ namespace TransportChecker
             var btnSubmit = fl_main.Controls.Find($"btnSubmit_{id}", true).FirstOrDefault() as MaterialButton;
             var parentPainel = (FlowLayoutPanel)button.Parent;
             var parentCard = (MaterialCard)parentPainel.Parent;
-            var listParent = parentCard.Controls.OfType<FlowLayoutPanel>()
-                .FirstOrDefault(painel =>
-                    painel.Name.ToLower().Contains("product")
-                );
+
+            var routeRecomendedVehicleList = parentCard.Controls.Find($"list_routeRecomendedVehicles{id}", true).FirstOrDefault() as MaterialListView;
+            var products = parentCard.Controls.Find($"list_{id}", true).FirstOrDefault() as MaterialListView;
 
             var textProduct = parentPainel.Controls.OfType<MaterialTextBox>()
                 .FirstOrDefault(textBox =>
@@ -111,11 +110,7 @@ namespace TransportChecker
 
             var addButton = parentPainel.Controls
                 .OfType<MaterialButton>()
-                .First(button => button.Name.ToLower().Contains("add"));
-
-            var products = listParent.Controls
-                .OfType<MaterialListView>()
-                .First(list => list.Name.Contains("list"));
+                .First(button => button.Name.ToLower().Contains("add"));            
             #endregion
 
             double weight;
@@ -126,23 +121,45 @@ namespace TransportChecker
 
             if (isWeightDouble && isCountInteger)
             {
-                var item = new ListViewItem(new string[] {
+                Product productItem = new Product(
                     textProduct.Text,
-                    textWeight.Text,
-                    textCount.Text
+                    Convert.ToDouble(textWeight.Text),
+                    Convert.ToInt32(textCount.Text)
+                );
+
+                var item = new ListViewItem(new string[] {
+                    productItem.name,
+                    productItem.weight.ToString(),
+                    productItem.count.ToString()
                 });
+                item.Tag = productItem;
 
                 products.Items.Add(item);
 
-                if (products.Items.Count > 0)
+                if (products != null && products.Items.Count > 0)
                 {
+                    var list = new List<Product>();
+                    foreach (ListViewItem product in products.Items)
+                    {
+                        list.Add((Product)item.Tag);
+                    }
+
+                    routeRecomendedVehicleList.Items.Clear();
+                    int[] recommendedVehicles = recommendVehicle(list);
+
+                    routeRecomendedVehicleList.Items.AddRange(new[] {
+                        new ListViewItem(new[] { $"Low", $"{recommendedVehicles[0]}" }),
+                        new ListViewItem(new[] { $"Mid", $"{recommendedVehicles[1]}" }),
+                        new ListViewItem(new[] { $"High", $"{recommendedVehicles[2]}" })
+                    });
+
                     btnAddRoute.Enabled = true;
                     btnSubmit.Enabled = true;
                 }
             }
             else
             {
-                MessageBox.Show("The weight should be an number.", "Error:");
+                MaterialMessageBox.Show("The weight should be an number.", "Error:");
             }
         }
         private List<City> findAllCities()
@@ -341,7 +358,7 @@ namespace TransportChecker
             var card = new MaterialCard();
             card.Name = $"card_{id}";
             card.Width = 500;
-            card.Height = 350;
+            card.Height = 420;
 
             #region Title
             var titleContainer = createLayout($"flTitle_{id}", DockStyle.Top);
@@ -421,6 +438,7 @@ namespace TransportChecker
 
             #region Footer
             var productsContainer = createLayout($"fl_product_{id}", DockStyle.Fill);
+            productsContainer.WrapContents = true;
 
             var products = new MaterialListView();
 
@@ -432,15 +450,26 @@ namespace TransportChecker
                     new ColumnHeader { Text = "Weight", Width = 60 },
                     new ColumnHeader { Text = "Count", Width = 75 }
                 });
+            products.Tag = "Product";
+
+            var recommendedVehicles = new MaterialListView();
+
+            recommendedVehicles.Width = 90;
+            recommendedVehicles.Scrollable = true;
+            recommendedVehicles.Name = $"list_routeRecomendedVehicles{id}";
+            recommendedVehicles.Columns.AddRange(new[] {
+                    new ColumnHeader { Text = "Vehicle", Width = 40 },
+                    new ColumnHeader { Text = "Count", Width = 40 }
+                });
 
             var btnSubmit = new MaterialButton();
-            btnSubmit.Margin = new Padding(115, 0, 0, 0);
+            btnSubmit.Margin = new Padding(175, 0, 0, 0);
             btnSubmit.Name = $"btnSubmit_{id}";
             btnSubmit.Text = $"Subtmit";
             btnSubmit.Enabled = false;
             //TODO CLICK
 
-            productsContainer.Controls.AddRange(new Control[] { products, btnSubmit });
+            productsContainer.Controls.AddRange(new Control[] { products, recommendedVehicles, btnSubmit });
             #endregion
 
             card.Controls.Add(productsContainer);
