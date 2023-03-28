@@ -36,6 +36,9 @@
             tab_transaction = new TabPage();
             flowLayoutPanel1 = new FlowLayoutPanel();
             card_transaction = new MaterialSkin.Controls.MaterialCard();
+            list_totalRecomendedVehicles = new MaterialSkin.Controls.MaterialListView();
+            vehicleSize = new ColumnHeader();
+            vehicleCount = new ColumnHeader();
             btn_selectRoutes = new MaterialSkin.Controls.MaterialButton();
             btn_reset = new MaterialSkin.Controls.MaterialButton();
             text_count = new MaterialSkin.Controls.MaterialTextBox();
@@ -51,9 +54,6 @@
             text_companyName = new MaterialSkin.Controls.MaterialTextBox();
             fl_main = new FlowLayoutPanel();
             tab_entries = new TabPage();
-            materialListView1 = new MaterialSkin.Controls.MaterialListView();
-            vehicleSize = new ColumnHeader();
-            vehicleCount = new ColumnHeader();
             tabs.SuspendLayout();
             tab_transaction.SuspendLayout();
             flowLayoutPanel1.SuspendLayout();
@@ -130,7 +130,7 @@
             // 
             card_transaction.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             card_transaction.BackColor = Color.FromArgb(255, 255, 255);
-            card_transaction.Controls.Add(materialListView1);
+            card_transaction.Controls.Add(list_totalRecomendedVehicles);
             card_transaction.Controls.Add(btn_selectRoutes);
             card_transaction.Controls.Add(btn_reset);
             card_transaction.Controls.Add(text_count);
@@ -150,6 +150,37 @@
             card_transaction.Padding = new Padding(14);
             card_transaction.Size = new Size(550, 322);
             card_transaction.TabIndex = 3;
+            // 
+            // list_totalRecomendedVehicles
+            // 
+            list_totalRecomendedVehicles.AutoSizeTable = false;
+            list_totalRecomendedVehicles.BackColor = Color.FromArgb(255, 255, 255);
+            list_totalRecomendedVehicles.BorderStyle = BorderStyle.None;
+            list_totalRecomendedVehicles.Columns.AddRange(new ColumnHeader[] { vehicleSize, vehicleCount });
+            list_totalRecomendedVehicles.Depth = 0;
+            list_totalRecomendedVehicles.FullRowSelect = true;
+            list_totalRecomendedVehicles.Location = new Point(323, 158);
+            list_totalRecomendedVehicles.MinimumSize = new Size(200, 100);
+            list_totalRecomendedVehicles.MouseLocation = new Point(-1, -1);
+            list_totalRecomendedVehicles.MouseState = MaterialSkin.MouseState.OUT;
+            list_totalRecomendedVehicles.Name = "list_totalRecomendedVehicles";
+            list_totalRecomendedVehicles.OwnerDraw = true;
+            list_totalRecomendedVehicles.Size = new Size(200, 100);
+            list_totalRecomendedVehicles.TabIndex = 12;
+            list_totalRecomendedVehicles.Tag = "Product";
+            list_totalRecomendedVehicles.UseCompatibleStateImageBehavior = false;
+            list_totalRecomendedVehicles.View = View.Details;
+            // 
+            // vehicleSize
+            // 
+            vehicleSize.Text = "Vehicle size";
+            vehicleSize.Width = 120;
+            // 
+            // vehicleCount
+            // 
+            vehicleCount.Text = "Count";
+            vehicleCount.TextAlign = HorizontalAlignment.Center;
+            vehicleCount.Width = 75;
             // 
             // btn_selectRoutes
             // 
@@ -380,37 +411,6 @@
             tab_entries.ToolTipText = "See all entries";
             tab_entries.UseVisualStyleBackColor = true;
             // 
-            // materialListView1
-            // 
-            materialListView1.AutoSizeTable = false;
-            materialListView1.BackColor = Color.FromArgb(255, 255, 255);
-            materialListView1.BorderStyle = BorderStyle.None;
-            materialListView1.Columns.AddRange(new ColumnHeader[] { vehicleSize, vehicleCount });
-            materialListView1.Depth = 0;
-            materialListView1.FullRowSelect = true;
-            materialListView1.Location = new Point(323, 158);
-            materialListView1.MinimumSize = new Size(200, 100);
-            materialListView1.MouseLocation = new Point(-1, -1);
-            materialListView1.MouseState = MaterialSkin.MouseState.OUT;
-            materialListView1.Name = "materialListView1";
-            materialListView1.OwnerDraw = true;
-            materialListView1.Size = new Size(200, 100);
-            materialListView1.TabIndex = 12;
-            materialListView1.Tag = "Product";
-            materialListView1.UseCompatibleStateImageBehavior = false;
-            materialListView1.View = View.Details;
-            // 
-            // vehicleSize
-            // 
-            vehicleSize.Text = "Vehicle size";
-            vehicleSize.Width = 120;
-            // 
-            // vehicleCount
-            // 
-            vehicleCount.Text = "Count";
-            vehicleCount.TextAlign = HorizontalAlignment.Center;
-            vehicleCount.Width = 75;
-            // 
             // Main
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -457,7 +457,7 @@
         private TabPage tab_entries;
         private FlowLayoutPanel flowLayoutPanel1;
         private FlowLayoutPanel fl_main;
-        private MaterialSkin.Controls.MaterialListView materialListView1;
+        private MaterialSkin.Controls.MaterialListView list_totalRecomendedVehicles;
         private ColumnHeader vehicleSize;
         private ColumnHeader vehicleCount;
     }

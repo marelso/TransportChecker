@@ -41,6 +41,47 @@ namespace TransportChecker
                 : MaterialSkin.MaterialSkinManager.Themes.LIGHT;
         }
 
+        private int[] recommendVehicle(List<Product> products)
+        {
+            double totalWeight = 0;
+
+
+            foreach (var item in products)
+            {
+                totalWeight += (item.weight * item.count);
+            }
+
+            var low = new Vehicle(VehicleType.Low);
+            var mid = new Vehicle(VehicleType.Medium);
+            var high = new Vehicle(VehicleType.High);
+
+            int countHigh = Convert.ToInt32(totalWeight / high.maximumWeight);
+            int countMid = 0;
+            int countLow = 0;
+
+            double remaining = totalWeight - (countHigh * high.maximumWeight);
+
+            if (remaining > 0)
+            {
+                countMid = Convert.ToInt32(remaining / mid.maximumWeight);
+                remaining = remaining - (countMid * mid.maximumWeight);
+
+                if (remaining > 0)
+                {
+                    countLow = Convert.ToInt32(remaining / low.maximumWeight);
+                    remaining = remaining - (countLow * low.maximumWeight);
+                    if (remaining > 0)
+                    {
+                        countLow++;
+                    }
+                }
+            }
+
+            return new int[] { countLow, countMid, countHigh };
+        }
+
+
+        #region Route events
         private void btnAddItemClick(object sender, EventArgs e)
         {
             #region Initialize components
@@ -104,7 +145,6 @@ namespace TransportChecker
                 MessageBox.Show("The weight should be an number.", "Error:");
             }
         }
-
         private List<City> findAllCities()
         {
             validateDatabaseFile();
@@ -117,7 +157,6 @@ namespace TransportChecker
 
             return result;
         }
-
         private Dictionary<string, int> findDistanceBetweenCities(string origin)
         {
             validateDatabaseFile();
@@ -149,7 +188,6 @@ namespace TransportChecker
 
             return distance[origin];
         }
-
         private void cbVehicleSelectionChange(object sender, EventArgs e)
         {
             var comboBox = (MaterialComboBox)sender;
@@ -157,7 +195,6 @@ namespace TransportChecker
 
             search(id);
         }
-
         private void btnSearchClick(object sender, EventArgs e)
         {
             var btn = sender as MaterialButton;
@@ -165,7 +202,6 @@ namespace TransportChecker
 
             search(id);
         }
-
         private void search(int id)
         {
             #region Parents
@@ -233,7 +269,6 @@ namespace TransportChecker
                 }
             }
         }
-
         private void txtCheckTextChange(object sender, EventArgs e)
         {
             var changedTextBox = (MaterialTextBox)sender;
@@ -262,12 +297,10 @@ namespace TransportChecker
                 addButton.Enabled = false;
             }
         }
-
         private int getCardCount()
         {
             return fl_main.Controls.OfType<MaterialCard>().Count();
         }
-
         private void validateDatabaseFile()
         {
             if (!File.Exists(this.source))
@@ -275,7 +308,6 @@ namespace TransportChecker
                 throw new Exception("Error:\n datafile not found. Please check if you have any .csv file in your folder.");
             }
         }
-
         private void btnNewRoute_Click(object sender, EventArgs e)
         {
             MaterialCard newCard = includeCard(getCardCount() + 1);
@@ -300,6 +332,7 @@ namespace TransportChecker
                 }
             }
         }
+        #endregion
 
 
         #region Factories
@@ -474,6 +507,7 @@ namespace TransportChecker
             var btnSelectRoute = card_transaction.Controls.Find($"btn_selectRoutes", true).FirstOrDefault() as MaterialButton;
             var btnRemove = card_transaction.Controls.Find($"btn_removeProduct", true).FirstOrDefault() as MaterialButton;
             var productList = card_transaction.Controls.Find($"list_totalProducts", true).FirstOrDefault() as MaterialListView;
+            var totalRecomendedVehicleList = card_transaction.Controls.Find($"list_totalRecomendedVehicles", true).FirstOrDefault() as MaterialListView;
             var textProduct = card_transaction.Controls.Find($"text_product", true).FirstOrDefault() as MaterialTextBox;
             var textWeight = card_transaction.Controls.Find($"text_weight", true).FirstOrDefault() as MaterialTextBox;
             var textCount = card_transaction.Controls.Find($"text_count", true).FirstOrDefault() as MaterialTextBox;
@@ -494,10 +528,26 @@ namespace TransportChecker
 
             if (productList != null || productList.Items.Count > 0)
             {
+                var list = new List<Product>();
+                foreach (ListViewItem item in productList.Items)
+                {
+                    list.Add((Product)item.Tag);
+                }
+
+                totalRecomendedVehicleList.Items.Clear();
+                int[] recommendedVehicles = recommendVehicle(list);
+
+                totalRecomendedVehicleList.Items.AddRange(new[] {
+                    new ListViewItem(new[] { $"Low", $"{recommendedVehicles[0]}" }),
+                    new ListViewItem(new[] { $"Mid", $"{recommendedVehicles[1]}" }),
+                    new ListViewItem(new[] { $"High", $"{recommendedVehicles[2]}" })
+                });
+
                 btnRemove.Enabled = true;
                 btnSelectRoute.Enabled = true;
-
             }
+
+
         }
         private void btnRemoveProductClick(object sender, EventArgs e)
         {
@@ -550,6 +600,7 @@ namespace TransportChecker
             var btnRemove = card_transaction.Controls.Find($"btn_removeProduct", true).FirstOrDefault() as MaterialButton;
             var btnSelectRoute = card_transaction.Controls.Find($"btn_selectRoutes", true).FirstOrDefault() as MaterialButton;
             var productList = card_transaction.Controls.Find($"list_totalProducts", true).FirstOrDefault() as MaterialListView;
+            var totalRecomendedVehicleList = card_transaction.Controls.Find($"list_totalRecomendedVehicles", true).FirstOrDefault() as MaterialListView;
             var textProduct = card_transaction.Controls.Find($"text_product", true).FirstOrDefault() as MaterialTextBox;
             var textWeight = card_transaction.Controls.Find($"text_weight", true).FirstOrDefault() as MaterialTextBox;
             var textCount = card_transaction.Controls.Find($"text_count", true).FirstOrDefault() as MaterialTextBox;
@@ -561,6 +612,7 @@ namespace TransportChecker
             textCount.ResetText();
 
             productList.Items.Clear();
+            totalRecomendedVehicleList.Items.Clear();
 
             btnRemove.Enabled = false;
             btnSelectRoute.Enabled = false;

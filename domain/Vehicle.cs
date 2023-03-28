@@ -27,17 +27,17 @@ namespace TransportChecker.domain
             {
                 case VehicleType.Low:
                     this.type = VehicleType.Low;
-                    this.maximumWeight = 1.0; 
+                    this.maximumWeight = 1000; 
                     this.costPerKm = 4.87;
                     break;
                 case VehicleType.Medium:
                     this.type = VehicleType.Medium;
-                    this.maximumWeight = 4.0;
+                    this.maximumWeight = 4000;
                     this.costPerKm = 11.92;
                     break;
                 case VehicleType.High:
                     this.type = VehicleType.High;
-                    this.maximumWeight = 10.0;
+                    this.maximumWeight = 10000;
                     this.costPerKm = 27.44;
                     break;
 
