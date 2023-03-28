@@ -46,7 +46,6 @@ namespace TransportChecker
         {
             double totalWeight = 0;
 
-
             foreach (var item in products)
             {
                 totalWeight += (item.weight * item.count);
@@ -81,6 +80,27 @@ namespace TransportChecker
             return new int[] { countLow, countMid, countHigh };
         }
 
+        private bool fieldsAreValid(string textWeight, string textCount)
+        {
+            double weight;
+            bool isWeightDouble = double.TryParse(textWeight, out weight);
+
+            int count;
+            bool isCountInteger = int.TryParse(textCount, out count);
+            if (isWeightDouble && isCountInteger)
+            {
+                return true;
+            }
+            else
+            {
+                var andParam = !isWeightDouble && !isCountInteger ? " and " : "";
+                var countParam = !isCountInteger ? "count" : "";
+                var weightParam = !isWeightDouble ? "weight" : "";
+                MessageBox.Show($"The {weightParam}{andParam}{countParam} should be an number.", "Error:");
+                return false;
+            }
+        }
+
         #region Route events
         private void btnAddItemClick(object sender, EventArgs e)
         {
@@ -113,13 +133,7 @@ namespace TransportChecker
                 .First(button => button.Name.ToLower().Contains("add"));            
             #endregion
 
-            double weight;
-            bool isWeightDouble = double.TryParse(textWeight.Text, out weight);
-
-            int count;
-            bool isCountInteger = int.TryParse(textCount.Text, out count);
-
-            if (isWeightDouble && isCountInteger)
+            if(fieldsAreValid(textWeight.Text, textCount.Text))
             {
                 Product productItem = new Product(
                     textProduct.Text,
@@ -157,10 +171,8 @@ namespace TransportChecker
                     btnSubmit.Enabled = true;
                 }
             }
-            else
-            {
-                MaterialMessageBox.Show("The weight should be an number.", "Error:");
-            }
+
+            
         }
         private List<City> findAllCities()
         {
@@ -351,7 +363,6 @@ namespace TransportChecker
         }
         #endregion
 
-
         #region Factories
         private MaterialCard includeCard(int id)
         {
@@ -480,12 +491,10 @@ namespace TransportChecker
 
             return card;
         }
-
         private Array populateVehicleType()
         {
             return Enum.GetValues(typeof(VehicleType));
         }
-
         private FlowLayoutPanel createLayout(string name, DockStyle style, int height = 60)
         {
             var container = new FlowLayoutPanel();
@@ -496,7 +505,6 @@ namespace TransportChecker
 
             return container;
         }
-
         private MaterialComboBox createComboBox(string name, string hint, int width)
         {
             MaterialComboBox comboBox = new MaterialComboBox();
@@ -507,7 +515,6 @@ namespace TransportChecker
 
             return comboBox;
         }
-
         private MaterialLabel createLabel(string name, string text)
         {
             MaterialLabel label = new MaterialLabel();
@@ -517,7 +524,6 @@ namespace TransportChecker
 
             return label;
         }
-
         private MaterialTextBox createTextBox(string name, string hint, int width)
         {
             MaterialTextBox textBox = new MaterialTextBox();
@@ -541,39 +547,42 @@ namespace TransportChecker
             var textWeight = card_transaction.Controls.Find($"text_weight", true).FirstOrDefault() as MaterialTextBox;
             var textCount = card_transaction.Controls.Find($"text_count", true).FirstOrDefault() as MaterialTextBox;
 
-            var product = new Product(
-                textProduct.Text,
-                Convert.ToDouble(textWeight.Text),
-                Convert.ToInt32(textCount.Text)
-            );
-
-            if (product.isFilled())
+            if(fieldsAreValid(textWeight.Text, textCount.Text))
             {
-                var item = new ListViewItem(new[] { product.name, product.weight.ToString(), product.count.ToString() });
-                item.Tag = product;
+                var product = new Product(
+                    textProduct.Text,
+                    Convert.ToDouble(textWeight.Text),
+                    Convert.ToInt32(textCount.Text)
+                );
 
-                productList.Items.Add(item);
-            }
-
-            if (productList != null || productList.Items.Count > 0)
-            {
-                var list = new List<Product>();
-                foreach (ListViewItem item in productList.Items)
+                if (product.isFilled())
                 {
-                    list.Add((Product)item.Tag);
+                    var item = new ListViewItem(new[] { product.name, product.weight.ToString(), product.count.ToString() });
+                    item.Tag = product;
+
+                    productList.Items.Add(item);
                 }
 
-                totalRecomendedVehicleList.Items.Clear();
-                int[] recommendedVehicles = recommendVehicle(list);
+                if (productList != null || productList.Items.Count > 0)
+                {
+                    var list = new List<Product>();
+                    foreach (ListViewItem item in productList.Items)
+                    {
+                        list.Add((Product)item.Tag);
+                    }
 
-                totalRecomendedVehicleList.Items.AddRange(new[] {
+                    totalRecomendedVehicleList.Items.Clear();
+                    int[] recommendedVehicles = recommendVehicle(list);
+
+                    totalRecomendedVehicleList.Items.AddRange(new[] {
                     new ListViewItem(new[] { $"Low", $"{recommendedVehicles[0]}" }),
                     new ListViewItem(new[] { $"Mid", $"{recommendedVehicles[1]}" }),
                     new ListViewItem(new[] { $"High", $"{recommendedVehicles[2]}" })
                 });
 
-                btnRemove.Enabled = true;
-                btnSelectRoute.Enabled = true;
+                    btnRemove.Enabled = true;
+                    btnSelectRoute.Enabled = true;
+                }
             }
 
 
@@ -658,6 +667,5 @@ namespace TransportChecker
             card.Focus();
         }
         #endregion
-
     }
 }
