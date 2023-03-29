@@ -55,6 +55,10 @@
             fl_main = new FlowLayoutPanel();
             tab_entries = new TabPage();
             entries = new FlowLayoutPanel();
+            available_items = new MaterialSkin.Controls.MaterialListView();
+            columnHeader1 = new ColumnHeader();
+            columnHeader2 = new ColumnHeader();
+            columnHeader3 = new ColumnHeader();
             tabs.SuspendLayout();
             tab_transaction.SuspendLayout();
             flowLayoutPanel1.SuspendLayout();
@@ -112,7 +116,7 @@
             tab_transaction.Location = new Point(4, 39);
             tab_transaction.Name = "tab_transaction";
             tab_transaction.Padding = new Padding(3);
-            tab_transaction.Size = new Size(716, 476);
+            tab_transaction.Size = new Size(716, 496);
             tab_transaction.TabIndex = 0;
             tab_transaction.Text = "New transaction";
             tab_transaction.ToolTipText = "Include new transaction";
@@ -120,12 +124,11 @@
             // 
             // flowLayoutPanel1
             // 
-            flowLayoutPanel1.AutoScroll = true;
             flowLayoutPanel1.Controls.Add(card_transaction);
             flowLayoutPanel1.Controls.Add(fl_main);
             flowLayoutPanel1.Location = new Point(44, 6);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(631, 1200);
+            flowLayoutPanel1.Size = new Size(631, 800);
             flowLayoutPanel1.TabIndex = 5;
             // 
             // card_transaction
@@ -397,7 +400,7 @@
             fl_main.Location = new Point(20, 353);
             fl_main.Margin = new Padding(20, 3, 3, 3);
             fl_main.Name = "fl_main";
-            fl_main.Size = new Size(601, 450);
+            fl_main.Size = new Size(629, 501);
             fl_main.TabIndex = 9;
             fl_main.WrapContents = false;
             // 
@@ -423,12 +426,51 @@
             entries.Size = new Size(675, 475);
             entries.TabIndex = 0;
             // 
+            // available_items
+            // 
+            available_items.AutoSizeTable = false;
+            available_items.BackColor = Color.FromArgb(255, 255, 255);
+            available_items.BorderStyle = BorderStyle.None;
+            available_items.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2, columnHeader3 });
+            available_items.Depth = 0;
+            available_items.FullRowSelect = true;
+            available_items.Location = new Point(343, 11);
+            available_items.MinimumSize = new Size(200, 100);
+            available_items.MouseLocation = new Point(-1, -1);
+            available_items.MouseState = MaterialSkin.MouseState.OUT;
+            available_items.Name = "available_items";
+            available_items.OwnerDraw = true;
+            available_items.Size = new Size(262, 100);
+            available_items.TabIndex = 9;
+            available_items.Tag = "Product";
+            available_items.UseCompatibleStateImageBehavior = false;
+            available_items.View = View.Details;
+            available_items.Visible = false;
+            // 
+            // columnHeader1
+            // 
+            columnHeader1.Text = "Name";
+            columnHeader1.Width = 95;
+            // 
+            // columnHeader2
+            // 
+            columnHeader2.Text = "Weight";
+            columnHeader2.TextAlign = HorizontalAlignment.Center;
+            columnHeader2.Width = 78;
+            // 
+            // columnHeader3
+            // 
+            columnHeader3.Text = "Count";
+            columnHeader3.TextAlign = HorizontalAlignment.Right;
+            columnHeader3.Width = 70;
+            // 
             // Main
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
             ClientSize = new Size(933, 661);
+            Controls.Add(available_items);
             Controls.Add(tabs);
             Controls.Add(switchTheme);
             DrawerTabControl = tabs;
@@ -474,5 +516,9 @@
         private ColumnHeader vehicleSize;
         private ColumnHeader vehicleCount;
         private FlowLayoutPanel entries;
+        private MaterialSkin.Controls.MaterialListView available_items;
+        private ColumnHeader columnHeader1;
+        private ColumnHeader columnHeader2;
+        private ColumnHeader columnHeader3;
     }
 }

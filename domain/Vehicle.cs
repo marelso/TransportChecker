@@ -9,7 +9,7 @@ namespace TransportChecker.domain
     enum VehicleType
     {
         Low,
-        Medium,
+        Mid,
         High
     }
 
@@ -30,8 +30,8 @@ namespace TransportChecker.domain
                     this.maximumWeight = 1000; 
                     this.costPerKm = 4.87;
                     break;
-                case VehicleType.Medium:
-                    this.type = VehicleType.Medium;
+                case VehicleType.Mid:
+                    this.type = VehicleType.Mid;
                     this.maximumWeight = 4000;
                     this.costPerKm = 11.92;
                     break;
