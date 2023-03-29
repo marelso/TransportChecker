@@ -54,10 +54,12 @@
             text_companyName = new MaterialSkin.Controls.MaterialTextBox();
             fl_main = new FlowLayoutPanel();
             tab_entries = new TabPage();
+            entries = new FlowLayoutPanel();
             tabs.SuspendLayout();
             tab_transaction.SuspendLayout();
             flowLayoutPanel1.SuspendLayout();
             card_transaction.SuspendLayout();
+            tab_entries.SuspendLayout();
             SuspendLayout();
             // 
             // switchTheme
@@ -92,14 +94,14 @@
             tabs.Controls.Add(tab_entries);
             tabs.Depth = 0;
             tabs.ImageList = icons_list;
-            tabs.Location = new Point(101, 104);
+            tabs.Location = new Point(105, 98);
             tabs.MouseState = MaterialSkin.MouseState.HOVER;
             tabs.Multiline = true;
             tabs.Name = "tabs";
             tabs.RightToLeftLayout = true;
             tabs.SelectedIndex = 0;
             tabs.ShowToolTips = true;
-            tabs.Size = new Size(724, 900);
+            tabs.Size = new Size(724, 539);
             tabs.TabIndex = 8;
             // 
             // tab_transaction
@@ -110,7 +112,7 @@
             tab_transaction.Location = new Point(4, 39);
             tab_transaction.Name = "tab_transaction";
             tab_transaction.Padding = new Padding(3);
-            tab_transaction.Size = new Size(716, 857);
+            tab_transaction.Size = new Size(716, 476);
             tab_transaction.TabIndex = 0;
             tab_transaction.Text = "New transaction";
             tab_transaction.ToolTipText = "Include new transaction";
@@ -121,9 +123,9 @@
             flowLayoutPanel1.AutoScroll = true;
             flowLayoutPanel1.Controls.Add(card_transaction);
             flowLayoutPanel1.Controls.Add(fl_main);
-            flowLayoutPanel1.Location = new Point(53, 6);
+            flowLayoutPanel1.Location = new Point(44, 6);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(589, 1200);
+            flowLayoutPanel1.Size = new Size(631, 1200);
             flowLayoutPanel1.TabIndex = 5;
             // 
             // card_transaction
@@ -395,28 +397,38 @@
             fl_main.Location = new Point(20, 353);
             fl_main.Margin = new Padding(20, 3, 3, 3);
             fl_main.Name = "fl_main";
-            fl_main.Size = new Size(544, 400);
+            fl_main.Size = new Size(601, 450);
             fl_main.TabIndex = 9;
             fl_main.WrapContents = false;
             // 
             // tab_entries
             // 
+            tab_entries.Controls.Add(entries);
             tab_entries.ImageKey = "ico_entries";
             tab_entries.Location = new Point(4, 39);
             tab_entries.Name = "tab_entries";
             tab_entries.Padding = new Padding(3);
-            tab_entries.Size = new Size(716, 857);
+            tab_entries.Size = new Size(716, 496);
             tab_entries.TabIndex = 1;
             tab_entries.Text = "Entries";
             tab_entries.ToolTipText = "See all entries";
             tab_entries.UseVisualStyleBackColor = true;
+            // 
+            // entries
+            // 
+            entries.AutoScroll = true;
+            entries.Location = new Point(19, 5);
+            entries.Margin = new Padding(3, 2, 3, 2);
+            entries.Name = "entries";
+            entries.Size = new Size(675, 475);
+            entries.TabIndex = 0;
             // 
             // Main
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
-            ClientSize = new Size(933, 600);
+            ClientSize = new Size(933, 661);
             Controls.Add(tabs);
             Controls.Add(switchTheme);
             DrawerTabControl = tabs;
@@ -429,6 +441,7 @@
             flowLayoutPanel1.ResumeLayout(false);
             card_transaction.ResumeLayout(false);
             card_transaction.PerformLayout();
+            tab_entries.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -460,5 +473,6 @@
         private MaterialSkin.Controls.MaterialListView list_totalRecomendedVehicles;
         private ColumnHeader vehicleSize;
         private ColumnHeader vehicleCount;
+        private FlowLayoutPanel entries;
     }
 }

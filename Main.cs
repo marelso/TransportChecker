@@ -1,11 +1,16 @@
 using MaterialSkin.Controls;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using TransportChecker.domain;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
@@ -113,7 +118,7 @@ namespace TransportChecker
             var parentCard = (MaterialCard)parentPainel.Parent;
 
             var routeRecomendedVehicleList = parentCard.Controls.Find($"list_routeRecomendedVehicles{id}", true).FirstOrDefault() as MaterialListView;
-            var products = parentCard.Controls.Find($"list_{id}", true).FirstOrDefault() as MaterialListView;
+            var products = parentCard.Controls.Find($"list_products{id}", true).FirstOrDefault() as MaterialListView;
 
             var textProduct = parentPainel.Controls.OfType<MaterialTextBox>()
                 .FirstOrDefault(textBox =>
@@ -130,10 +135,10 @@ namespace TransportChecker
 
             var addButton = parentPainel.Controls
                 .OfType<MaterialButton>()
-                .First(button => button.Name.ToLower().Contains("add"));            
+                .First(button => button.Name.ToLower().Contains("add"));
             #endregion
 
-            if(fieldsAreValid(textWeight.Text, textCount.Text))
+            if (fieldsAreValid(textWeight.Text, textCount.Text))
             {
                 Product productItem = new Product(
                     textProduct.Text,
@@ -172,7 +177,196 @@ namespace TransportChecker
                 }
             }
 
-            
+
+        }
+        private void btnSubmitTransaction(object sender, EventArgs e)
+        {
+            //var company = card_transaction.Controls.Find($"text_companyName", true).FirstOrDefault().Text;
+
+            var transactionItems = card_transaction.Controls.Find($"list_totalProducts", true).FirstOrDefault() as MaterialListView;
+            var transactionVehicles = card_transaction.Controls.Find($"list_totalRecomendedVehicles", true).FirstOrDefault() as MaterialListView;
+
+            var totalDistance = 0;
+
+            var cards = fl_main.Controls
+                .OfType<MaterialCard>()
+                .ToList();
+
+            var entry = new MaterialCard();
+            entry.Width = 600;
+            entry.Height = 425;
+
+            #region Title
+            var headerContainer = new FlowLayoutPanel();
+            headerContainer.Height = 40;
+            headerContainer.Dock = DockStyle.Top;
+            headerContainer.FlowDirection = FlowDirection.LeftToRight;
+
+            var company = new MaterialLabel();
+            company.Text = card_transaction.Controls.Find($"list_totalProducts", true).FirstOrDefault().Text; ;
+            company.Width = 100;
+
+            var transactionDistance = new MaterialLabel();
+            transactionDistance.Width = 200;
+
+            var transactionCost = new MaterialLabel();
+            transactionCost.Text = "Total cost:";
+            transactionCost.Width = 200;
+
+            headerContainer.Controls.AddRange(new Control[] {
+                company, transactionDistance, transactionCost
+            });
+            #endregion
+
+            #region Lists
+            var listsContainer = new FlowLayoutPanel();
+            listsContainer.Dock = DockStyle.Fill;
+            listsContainer.Height = 70;
+            listsContainer.FlowDirection = FlowDirection.LeftToRight;
+            listsContainer.WrapContents = true;
+
+            var products = new MaterialListView();
+            products.Width = 350;
+            products.Height = 70;
+            products.Scrollable = true;
+            products.Columns.AddRange(new[] {
+                    new ColumnHeader { Text = "Product", Width = 110 },
+                    new ColumnHeader { Text = "Weight", Width = 80 },
+                    new ColumnHeader { Text = "Count", Width = 80 }
+                });
+            products.Tag = "Product";
+
+            foreach (ListViewItem item in transactionItems.Items)
+            {
+                products.Items.Add((ListViewItem)item.Clone());
+            }
+
+            var recommendedVehicles = new MaterialListView();
+            recommendedVehicles.Width = 90;
+            recommendedVehicles.Height = 70;
+            recommendedVehicles.Scrollable = true;
+            recommendedVehicles.Columns.AddRange(new[] {
+                    new ColumnHeader { Text = "Vehicle", Width = 110 },
+                    new ColumnHeader { Text = "Count", Width = 80 }
+                });
+            foreach (ListViewItem item in transactionVehicles.Items)
+            {
+                recommendedVehicles.Items.Add((ListViewItem)item.Clone());
+            }
+
+            listsContainer.Controls.AddRange(new Control[] { products, recommendedVehicles });
+            #endregion
+
+            #region Routes
+            var routeContainer = new FlowLayoutPanel();
+            routeContainer.Dock = DockStyle.Bottom;
+            routeContainer.FlowDirection = FlowDirection.LeftToRight;
+            routeContainer.WrapContents = false;
+            routeContainer.AutoScroll = true;
+            routeContainer.Height = 250;
+            routeContainer.Width = 510;
+
+            foreach (var item in cards)
+            {
+                #region Initialize components
+                var id = item.Name.ToString()[item.Name.ToString().Length - 1].ToString();
+
+                var cityOrigin = item.Controls.Find($"cbOrigin_{id}", true)
+                    .FirstOrDefault().Text;
+                var cityDestination = item.Controls.Find($"cbDestination_{id}", true)
+                    .FirstOrDefault().Text;
+                var givenDistance = item.Controls.Find($"lblDistance_{id}", true)
+                    .FirstOrDefault().Text;
+                var givenCost = item.Controls.Find($"textTotalCost_{id}", true)
+                    .FirstOrDefault().Text;
+                var deliveredProducts = item.Controls.Find($"list_products{id}", true).FirstOrDefault() as MaterialListView;
+                var vehicles = item.Controls.Find($"list_routeRecomendedVehicles{id}", true).FirstOrDefault() as MaterialListView;
+                #endregion
+
+                var card = new MaterialCard();
+                card.Width = 500;
+                card.Height = 180;
+
+                totalDistance += Convert.ToInt32(givenDistance.Replace("Distance: ", ""));
+
+                #region header
+                var routeHeader = new FlowLayoutPanel();
+                routeHeader.Height = 40;
+                routeHeader.Dock = DockStyle.Top;
+                routeHeader.FlowDirection = FlowDirection.LeftToRight;
+
+                var destination = new MaterialLabel();
+                destination.Text = $"{cityOrigin} to {cityDestination}";
+                destination.Width = 80;
+
+                var distance = new MaterialLabel();
+                distance.Text = $"Total distance:{givenDistance}";
+                distance.Width = 180;
+
+                var cost = new MaterialLabel();
+                cost.Text = $"Total cost:R$ {givenCost}";
+                cost.Width = 180;
+
+                routeHeader.Controls.AddRange(new Control[] {
+                    destination, distance, cost
+                });
+                #endregion
+
+                #region Lists
+                var routeContent = new FlowLayoutPanel();
+                routeContent.Dock = DockStyle.Fill;
+                routeContent.Height = 40;
+                routeContent.FlowDirection = FlowDirection.LeftToRight;
+                routeContent.WrapContents = true;
+
+                var routeProducts = new MaterialListView();
+                routeProducts.Width = 250;
+                routeProducts.Scrollable = true;
+                routeProducts.Columns.AddRange(new[] {
+                    new ColumnHeader { Text = "Product", Width = 100 },
+                    new ColumnHeader { Text = "Weight", Width = 80 },
+                    new ColumnHeader { Text = "Count", Width = 70 }
+                });
+                routeProducts.Tag = "Product";
+
+                foreach (ListViewItem itemView in deliveredProducts.Items)
+                {
+                    routeProducts.Items.Add((ListViewItem)itemView.Clone());
+                }
+
+                var routeRecommendedVehicles = new MaterialListView();
+                routeRecommendedVehicles.Width = 60;
+                routeRecommendedVehicles.Scrollable = true;
+                routeRecommendedVehicles.Columns.AddRange(new[] {
+                    new ColumnHeader { Text = "Vehicle", Width = 110 },
+                    new ColumnHeader { Text = "Count", Width = 80 }
+                });
+
+                foreach (ListViewItem itemView in vehicles.Items)
+                {
+                    var newItem = (ListViewItem)itemView.Clone();
+
+                    routeRecommendedVehicles.Items.Add(newItem);
+                }
+
+                routeContent.Controls.AddRange(new Control[] { routeProducts, routeRecommendedVehicles });
+                #endregion
+
+                card.Controls.AddRange(new Control[] { routeContent, routeHeader });
+
+                routeContainer.Controls.Add(card);
+            }
+            #endregion
+
+
+            transactionDistance.Text = $"Total distance: {totalDistance}";
+
+            entry.Controls.Add(routeContainer);
+            entry.Controls.Add(listsContainer);
+            entry.Controls.Add(headerContainer);
+
+
+            entries.Controls.Add(entry);
         }
         private List<City> findAllCities()
         {
@@ -455,7 +649,7 @@ namespace TransportChecker
 
             products.Width = 255;
             products.Scrollable = true;
-            products.Name = $"list_{id}";
+            products.Name = $"list_products{id}";
             products.Columns.AddRange(new[] {
                     new ColumnHeader { Text = "Product", Width = 95 },
                     new ColumnHeader { Text = "Weight", Width = 60 },
@@ -478,7 +672,7 @@ namespace TransportChecker
             btnSubmit.Name = $"btnSubmit_{id}";
             btnSubmit.Text = $"Subtmit";
             btnSubmit.Enabled = false;
-            //TODO CLICK
+            btnSubmit.Click += new EventHandler(btnSubmitTransaction);
 
             productsContainer.Controls.AddRange(new Control[] { products, recommendedVehicles, btnSubmit });
             #endregion
@@ -547,7 +741,7 @@ namespace TransportChecker
             var textWeight = card_transaction.Controls.Find($"text_weight", true).FirstOrDefault() as MaterialTextBox;
             var textCount = card_transaction.Controls.Find($"text_count", true).FirstOrDefault() as MaterialTextBox;
 
-            if(fieldsAreValid(textWeight.Text, textCount.Text))
+            if (fieldsAreValid(textWeight.Text, textCount.Text))
             {
                 var product = new Product(
                     textProduct.Text,
@@ -575,10 +769,10 @@ namespace TransportChecker
                     int[] recommendedVehicles = recommendVehicle(list);
 
                     totalRecomendedVehicleList.Items.AddRange(new[] {
-                    new ListViewItem(new[] { $"Low", $"{recommendedVehicles[0]}" }),
-                    new ListViewItem(new[] { $"Mid", $"{recommendedVehicles[1]}" }),
-                    new ListViewItem(new[] { $"High", $"{recommendedVehicles[2]}" })
-                });
+                        new ListViewItem(new[] { $"Low", $"{recommendedVehicles[0]}" }),
+                        new ListViewItem(new[] { $"Mid", $"{recommendedVehicles[1]}" }),
+                        new ListViewItem(new[] { $"High", $"{recommendedVehicles[2]}" })
+                    });
 
                     btnRemove.Enabled = true;
                     btnSelectRoute.Enabled = true;
