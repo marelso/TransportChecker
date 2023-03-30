@@ -158,9 +158,11 @@ namespace TransportChecker
                     if (products != null && products.Items.Count > 0)
                     {
                         var list = new List<Product>();
-                        foreach (ListViewItem product in products.Items)
+
+                        for (int i = 0; i < products.Items.Count; i++)
                         {
-                            list.Add((Product)item.Tag);
+                            Product insert = (Product)products.Items[i].Tag;
+                            list.Add(insert);
                         }
 
                         routeRecomendedVehicleList.Items.Clear();
@@ -461,6 +463,8 @@ namespace TransportChecker
 
 
             entries.Controls.Add(entry);
+
+            MessageBox.Show("The transaction has been submited and is ready to ship!");
         }
         private List<City> findAllCities()
         {
